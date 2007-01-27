@@ -11,10 +11,13 @@ email me at bryanlivingston@gmail.com
 
 The project page for this project is at: http://code.google.com/p/xnasharpnes/
 
+The latest release can be downloaded from:
+http://code.google.com/p/xnasharpnes/downloads/list
+
 You can get the latest source from our subversion repository at: 
 http://code.google.com/p/xnasharpnes/source
 
-This is a conversion of Sharpnes by Jonathan Turner.  Converting it only took
+This is a conversion of SharpNES by Jonathan Turner.  Converting it only took
 a couple of hours.  http://jturner.tapetrade.net/sharpnes/index.html
 
 It runs at 60% or 70% of normal speed on the 360, so it's playable but slow.
