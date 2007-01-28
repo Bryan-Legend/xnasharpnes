@@ -19,8 +19,7 @@ public class Joypad
         BUTTON_RIGHT = 128
     };
 
-    byte joypad1_lastwrite;
-    byte joypad2_lastwrite;
+    byte joypad_lastwrite;
     int joypad1_readpointer;
     int joypad2_readpointer;
 
@@ -97,14 +96,16 @@ public class Joypad
         return returnedValue;
     }
 
-    public void Joypad_1_Write(byte data)
+    public void Joypad_Write(byte data)
     {
-        if ((data == 0) && (joypad1_lastwrite == 1))
+        if ((data == 0) && (joypad_lastwrite == 1))
         {
             joypad1_state = InternalGetJoyState(PlayerIndex.One);
             joypad1_readpointer = 1;
+            joypad2_state = InternalGetJoyState(PlayerIndex.Two);
+            joypad2_readpointer = 1;
         }
-        joypad1_lastwrite = data;
+        joypad_lastwrite = data;
     }
    
     public byte Joypad_2_Read()
@@ -124,15 +125,5 @@ public class Joypad
         }
         joypad2_readpointer++;
         return returnedValue;
-    }
- 
-    public void Joypad_2_Write(byte data)
-    {
-        if ((data == 0) && (joypad2_lastwrite == 1))
-        {
-            joypad2_state = InternalGetJoyState(PlayerIndex.Two);
-            joypad2_readpointer = 1;
-        }
-        joypad2_lastwrite = data;
     }
 }
