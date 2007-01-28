@@ -552,28 +552,57 @@ public class NesEngine
 			//Console.Error.WriteLine(e);
 			return false;
 		}
-		
-		if (myCartridge.save_ram_present)
-		{
-			//If we have save RAM, try to load it
-			saveFilename = filename.Remove(filename.Length-3, 3);
-			saveFilename = saveFilename.Insert(saveFilename.Length, "sav");
-			//Console.WriteLine("SaveRAM enabled: {0}", saveFilename);
-			
-			try {
-				using(FileStream reader = File.OpenRead(saveFilename))
-				{
-					reader.Read(saveRam, 0, 0x2000);
-				}
-			}
-			catch (Exception e) {
-				//Console.WriteLine("No SaveRAM found.");
-				//Ignore it, we'll make our own.
-			}				
-		}
-		
+
+        if (myCartridge.save_ram_present)
+        {
+            //If we have save RAM, try to load it
+            saveFilename = filename.Remove(filename.Length - 3, 3);
+            saveFilename = saveFilename.Insert(saveFilename.Length, "sav");
+            //Console.WriteLine("SaveRAM enabled: {0}", saveFilename);
+        }
+				
 		return true;
 	}
+
+    public string SaveRamDirectory = String.Empty;
+
+    public void SaveRam()
+    {
+        if (myCartridge.save_ram_present)
+        {
+            //If we have save RAM, try to save it
+            try
+            {
+                using (FileStream writer = File.OpenWrite(Path.Combine(SaveRamDirectory, saveFilename)))
+                {
+                    writer.Write(saveRam, 0, 0x2000);
+                }
+            }
+            catch (Exception e)
+            {
+                //Console.WriteLine("SaveRAM could not be saved.");
+            }
+        }
+    }
+
+    public void LoadRam()
+    {
+        if (myCartridge.save_ram_present)
+        {
+            try
+            {
+                using (FileStream reader = File.OpenRead(Path.Combine(SaveRamDirectory, saveFilename)))
+                {
+                    reader.Read(saveRam, 0, 0x2000);
+                }
+            }
+            catch (Exception e)
+            {
+                //Console.WriteLine("No SaveRAM found.");
+                //Ignore it, we'll make our own.
+            }
+        }
+    }
 
     public void StartCart()
     {
@@ -587,39 +616,13 @@ public class NesEngine
 			my6502.RunProcessor();
 		}
 		catch (ThreadAbortException tae) {
-			if (myCartridge.save_ram_present)
-			{
-				//If we have save RAM, try to save it
-				try {
-					using(FileStream writer = File.OpenWrite(saveFilename))
-					{
-						writer.Write(saveRam, 0, 0x2000);
-					}
-				}
-				catch (Exception e) {
-					//Console.WriteLine("SaveRAM could not be saved.");
-				}				
-			}
-		}
+            SaveRam();
+        }
 	}
 
     public void StopCart()
     {
-        if (myCartridge.save_ram_present)
-        {
-            //If we have save RAM, try to save it
-            try
-            {
-                using (FileStream writer = File.OpenWrite(saveFilename))
-                {
-                    writer.Write(saveRam, 0, 0x2000);
-                }
-            }
-            catch (Exception e)
-            {
-                //Console.WriteLine("SaveRAM could not be saved.");
-            }
-        }
+        SaveRam();
         hasQuit = true;
         myPPU.myVideo.CloseVideo();
     }

@@ -1880,7 +1880,10 @@ public class ProcessorNes6502
 			{
                 myEngine.RenderNextScanline();
                 tick_count = tick_count - NesEngine.Ticks_Per_Scanline;
-                return;
+
+                // run the CPU until the scan line resets
+                if (myEngine.myPPU.currentScanline == 0)
+                    return;
 			}
 			//Let's call the ReadMemory function optimized for grabbing instructions
 			//currentOpcode = myEngine.ReadMemory8PC(pc_register);
@@ -1896,6 +1899,5 @@ public class ProcessorNes6502
 		
 		//FIXME: this is for debugging
 		total_tick_count = 0;
-	}
-	
+	}	
 }
