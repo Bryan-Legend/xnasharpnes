@@ -25,8 +25,9 @@ public class Joypad
     int joypad2_readpointer;
 
     byte joypad1_state;
+    byte joypad2_state;
 
-    private void InternalGetJoyState()
+    private byte InternalGetJoyState(PlayerIndex player)
     {
         //int numberOfKeys;
         ////FIXME: This is SDL-centric for the time being
@@ -52,25 +53,29 @@ public class Joypad
         //else if (keystate[(int)Sdl.SDLKey.SDLK_RIGHT] != 0)
         //    joypad1_state |= (byte)Button.BUTTON_RIGHT;
 
-        joypad1_state = 0;
+        byte result = 0;
 
-        GamePadState pad1 = GamePad.GetState(PlayerIndex.One);
-        if (pad1.Buttons.A == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_A;
-        if (pad1.Buttons.B == ButtonState.Pressed || pad1.Buttons.X == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_B;
-        if (pad1.Buttons.Back == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_SELECT;
-        if (pad1.Buttons.Start == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_START;
-        if (pad1.DPad.Up == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_UP;
-        else if (pad1.DPad.Down == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_DOWN;
-        if (pad1.DPad.Left == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_LEFT;
-        else if (pad1.DPad.Right == ButtonState.Pressed)
-            joypad1_state |= (byte)Button.BUTTON_RIGHT;
+        GamePadState pad = GamePad.GetState(player);
+        double y = pad.ThumbSticks.Left.Y;
+
+        if (pad.Buttons.A == ButtonState.Pressed)
+            result |= (byte)Button.BUTTON_A;
+        if (pad.Buttons.B == ButtonState.Pressed || pad.Buttons.X == ButtonState.Pressed)
+            result |= (byte)Button.BUTTON_B;
+        if (pad.Buttons.Back == ButtonState.Pressed)
+            result |= (byte)Button.BUTTON_SELECT;
+        if (pad.Buttons.Start == ButtonState.Pressed)
+            result |= (byte)Button.BUTTON_START;
+        if (pad.DPad.Up == ButtonState.Pressed || pad.ThumbSticks.Left.Y > .2)
+            result |= (byte)Button.BUTTON_UP;
+        else if (pad.DPad.Down == ButtonState.Pressed || pad.ThumbSticks.Left.Y < -.2)
+            result |= (byte)Button.BUTTON_DOWN;
+        if (pad.DPad.Left == ButtonState.Pressed || pad.ThumbSticks.Left.X < -.2)
+            result |= (byte)Button.BUTTON_LEFT;
+        else if (pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > .2)
+            result |= (byte)Button.BUTTON_RIGHT;
+
+        return result;
     }
     
     public byte Joypad_1_Read()
@@ -91,23 +96,43 @@ public class Joypad
         joypad1_readpointer++;
         return returnedValue;
     }
-    
-    public byte Joypad_2_Read()
-    {
-        return 0;
-    }
- 
+
     public void Joypad_1_Write(byte data)
     {
         if ((data == 0) && (joypad1_lastwrite == 1))
         {
-            InternalGetJoyState();
+            joypad1_state = InternalGetJoyState(PlayerIndex.One);
             joypad1_readpointer = 1;
         }
         joypad1_lastwrite = data;
     }
+   
+    public byte Joypad_2_Read()
+    {
+        byte returnedValue = 0;
 
+        switch (joypad2_readpointer)
+        {
+            case (1): if ((joypad2_state & (byte)Button.BUTTON_A) == (byte)Button.BUTTON_A) { returnedValue = 1; }; break;
+            case (2): if ((joypad2_state & (byte)Button.BUTTON_B) == (byte)Button.BUTTON_B) { returnedValue = 1; }; break;
+            case (3): if ((joypad2_state & (byte)Button.BUTTON_SELECT) == (byte)Button.BUTTON_SELECT) { returnedValue = 1; }; break;
+            case (4): if ((joypad2_state & (byte)Button.BUTTON_START) == (byte)Button.BUTTON_START) { returnedValue = 1; }; break;
+            case (5): if ((joypad2_state & (byte)Button.BUTTON_UP) == (byte)Button.BUTTON_UP) { returnedValue = 1; }; break;
+            case (6): if ((joypad2_state & (byte)Button.BUTTON_DOWN) == (byte)Button.BUTTON_DOWN) { returnedValue = 1; }; break;
+            case (7): if ((joypad2_state & (byte)Button.BUTTON_LEFT) == (byte)Button.BUTTON_LEFT) { returnedValue = 1; }; break;
+            case (8): if ((joypad2_state & (byte)Button.BUTTON_RIGHT) == (byte)Button.BUTTON_RIGHT) { returnedValue = 1; }; break;
+        }
+        joypad2_readpointer++;
+        return returnedValue;
+    }
+ 
     public void Joypad_2_Write(byte data)
     {
+        if ((data == 0) && (joypad2_lastwrite == 1))
+        {
+            joypad2_state = InternalGetJoyState(PlayerIndex.Two);
+            joypad2_readpointer = 1;
+        }
+        joypad2_lastwrite = data;
     }
 }

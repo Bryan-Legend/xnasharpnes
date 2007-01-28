@@ -13,7 +13,6 @@ namespace SharpNES360
         {
             using (SharpNES game = new SharpNES())
             {
-                game.LoadCart("Zelda.nes");
                 game.Run();
             }
         }

@@ -1,6 +1,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -20,6 +21,8 @@ namespace XNASharpNES
         Texture2D targetTexture;
         SpriteBatch spriteBatch;
 
+        bool running;
+
         public SharpNES()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -30,8 +33,30 @@ namespace XNASharpNES
 
         public void LoadCart(string filename)
         {
+#if XBOX
+            using (StorageContainer container = saveDevice.OpenContainer("SharpNES - Roms"))
+            {
+                // move roms from the run directory to the roms directory
+                foreach (string file in Directory.GetFiles(StorageContainer.TitleLocation, "*.nes"))
+                {
+                    File.Copy(file, Path.Combine(container.Path, Path.GetFileName(file)), true);
+                    File.Delete(file);
+                }
+                myEngine.LoadCart(Path.Combine(container.Path, filename));
+            }
+
+            using (StorageContainer container = saveDevice.OpenContainer("SharpNES - Saves"))
+            {
+                myEngine.LoadRam();
+            }
+
+#else
             myEngine.LoadCart(filename);
+            myEngine.LoadRam();
+#endif
+
             myEngine.StartCart();
+            running = true;
         }
 
         /// <summary>
@@ -78,6 +103,11 @@ namespace XNASharpNES
             }
         }
 
+        StorageDevice saveDevice;
+        bool storageDeviceRequested;
+        IAsyncResult storageDeviceRequestResult;
+
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input and playing audio.
@@ -87,12 +117,40 @@ namespace XNASharpNES
         {
             // Allows the default game to exit on Xbox 360 and Windows
             if (GamePad.GetState(PlayerIndex.One).Buttons.RightShoulder == ButtonState.Pressed)
+            {
+#if XBOX
+                using (StorageContainer container = saveDevice.OpenContainer("SharpNES - Saves"))
+                {
+                    myEngine.SaveRamDirectory = container.Path;
+                    myEngine.StopCart(); // Writes SaveRam
+                }
+#else
+                myEngine.StopCart(); // Writes SaveRam
+#endif
                 this.Exit();
+            }
 
-            // run the CPU until the scan line resets
-            myEngine.RunCart();
-            while (myEngine.myPPU.currentScanline != 0)
+            if (running)
                 myEngine.RunCart();
+            else
+            {
+#if XBOX
+                if (saveDevice == null)
+                {
+                    if (!storageDeviceRequested)
+                    {
+                        storageDeviceRequested = true;
+                        storageDeviceRequestResult = StorageDevice.BeginShowStorageDeviceGuide(PlayerIndex.One, null, null);
+                    }
+                    if ((storageDeviceRequested) && (storageDeviceRequestResult.IsCompleted))
+                    {
+                        saveDevice = StorageDevice.EndShowStorageDeviceGuide(storageDeviceRequestResult);
+                        LoadCart("Zelda.nes");
+                    }
+                }
+#else
+#endif
+            }
 
             base.Update(gameTime);
         }
@@ -105,11 +163,14 @@ namespace XNASharpNES
         {
             graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            targetTexture.SetData<short>(myEngine.myPPU.offscreenBuffer, 256 * 8, targetTexture.Width * targetTexture.Height, SetDataOptions.None);
+            if (running)
+            {
+                targetTexture.SetData<short>(myEngine.myPPU.offscreenBuffer, 256 * 8, targetTexture.Width * targetTexture.Height, SetDataOptions.None);
 
-            spriteBatch.Begin(SpriteBlendMode.AlphaBlend);
-            spriteBatch.Draw(targetTexture, new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Color.White);
-            spriteBatch.End();
+                spriteBatch.Begin(SpriteBlendMode.AlphaBlend);
+                spriteBatch.Draw(targetTexture, new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Color.White);
+                spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }
