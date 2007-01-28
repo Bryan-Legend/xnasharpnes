@@ -221,8 +221,7 @@ public class NesEngine
 			switch (address) 
 			{
 				case (0x4014): myPPU.SpriteRam_DMA_Begin(data); break;
-				case (0x4016): myJoypad.Joypad_1_Write(data); break;
-				case (0x4017): myJoypad.Joypad_2_Write(data); break;
+				case (0x4016): myJoypad.Joypad_Write(data); break;
 				//default: Console.WriteLine("UNKOWN WRITE: {0:x}", address); break;
 			}
 			if (myCartridge.mapper == 5)

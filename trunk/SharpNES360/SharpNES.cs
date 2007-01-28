@@ -145,7 +145,7 @@ namespace XNASharpNES
                     if ((storageDeviceRequested) && (storageDeviceRequestResult.IsCompleted))
                     {
                         saveDevice = StorageDevice.EndShowStorageDeviceGuide(storageDeviceRequestResult);
-                        LoadCart("Zelda.nes");
+                        LoadCart("Mario.nes");
                     }
                 }
 #else
