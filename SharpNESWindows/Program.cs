@@ -9,15 +9,15 @@ namespace XNASharpNES
         /// </summary>
         static void Main(string[] args)
         {
-            if (args.GetLength(0) == 0)
-            {
-                Console.WriteLine("Please specify a filename.");
-                Environment.Exit(1);
-            }
+            //if (args.GetLength(0) == 0)
+            //{
+            //    Console.WriteLine("Please specify a filename.");
+            //    Environment.Exit(1);
+            //}
 
             using (SharpNES game = new SharpNES())
             {
-                game.LoadCart(args[0]);
+                //game.LoadCart(args[0]);
                 game.Run();
             }
         }

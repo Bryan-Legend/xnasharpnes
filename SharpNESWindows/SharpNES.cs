@@ -22,6 +22,7 @@ namespace XNASharpNES
         SpriteBatch spriteBatch;
 
         bool running;
+        string currentRom;
 
         public SharpNES()
         {
@@ -33,22 +34,28 @@ namespace XNASharpNES
 
         public void LoadCart(string filename)
         {
-#if XBOX
-            using (StorageContainer container = saveDevice.OpenContainer("SharpNES - Roms"))
+            if (running)
             {
-                // move roms from the run directory to the roms directory
-                foreach (string file in Directory.GetFiles(StorageContainer.TitleLocation, "*.nes"))
-                {
-                    File.Copy(file, Path.Combine(container.Path, Path.GetFileName(file)), true);
-                    File.Delete(file);
-                }
-                myEngine.LoadCart(Path.Combine(container.Path, filename));
+                running = false;
+                myEngine.SaveRam();
+            }
+
+            myEngine.LoadCart(filename);
+
+#if XBOX
+            using (StorageContainer container = saveDevice.OpenContainer("SharpNES"))
+            {
+                myEngine.LoadRam();
+                SaveRomName(filename, container.Path);
             }
 #else
-            myEngine.LoadCart(filename);
+            myEngine.LoadRam();
+            SaveRomName(filename, StorageContainer.TitleLocation);
 #endif
 
             myEngine.StartCart();
+
+            currentRom = Path.GetFileName(filename);
             running = true;
         }
 
@@ -96,10 +103,93 @@ namespace XNASharpNES
             }
         }
 
+        void SaveRomName(string rom, string savePath)
+        {
+            using (StreamWriter writer = File.CreateText(Path.Combine(savePath, "LastRom.txt")))
+                writer.Write(rom);
+        }
+
+        string LoadRomName(string savePath)
+        {
+            string filename = Path.Combine(savePath, "LastRom.txt");
+            string result = String.Empty;
+
+            if (File.Exists(filename))
+            {
+                using (StreamReader reader = File.OpenText(filename))
+                    result = reader.ReadLine();
+            }
+
+            if (result.Length == 0 || !File.Exists(result))
+            {
+                string[] roms = Directory.GetFiles(StorageContainer.TitleLocation, "*.nes");
+                if (roms.Length == 0)
+                    throw new Exception("No roms found.");
+                Array.Sort(roms);
+                result = roms[0];
+            }
+
+            return result;
+        }
+
+        void Quit()
+        {
+#if XBOX
+            using (StorageContainer container = saveDevice.OpenContainer("SharpNES"))
+            {
+                myEngine.SaveRamDirectory = container.Path;
+                myEngine.StopCart(); // Writes SaveRam
+            }
+#else
+            myEngine.SaveRamDirectory = StorageContainer.TitleLocation;
+            myEngine.StopCart(); // Writes SaveRam
+#endif
+            this.Exit();
+        }
+
+        void LoadNextRom()
+        {
+            string[] roms = Directory.GetFiles(StorageContainer.TitleLocation, "*.nes");
+            if (roms.Length == 0)
+                throw new Exception("No roms found.");
+            Array.Sort(roms);
+            int count;
+            for (count = 0; count < roms.Length; count++)
+            {
+                if (Path.GetFileName(roms[count]) == currentRom)
+                {
+                    if (count == roms.Length - 1)
+                        count = -1;
+                    break;
+                }
+            }
+            LoadCart(roms[count + 1]);
+        }
+
+        void LoadPreviousRom()
+        {
+            string[] roms = Directory.GetFiles(StorageContainer.TitleLocation, "*.nes");
+            if (roms.Length == 0)
+                throw new Exception("No roms found.");
+            Array.Sort(roms);
+            int count;
+            for (count = 0; count < roms.Length; count++)
+            {
+                if (Path.GetFileName(roms[count]) == currentRom)
+                {
+                    if (count == 0)
+                        count = roms.Length;
+                    break;
+                }
+            }
+            LoadCart(roms[count - 1]);
+        }
+
+#if XBOX
         StorageDevice saveDevice;
         bool storageDeviceRequested;
         IAsyncResult storageDeviceRequestResult;
-
+#endif
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -109,18 +199,17 @@ namespace XNASharpNES
         protected override void Update(GameTime gameTime)
         {
             // Allows the default game to exit on Xbox 360 and Windows
-            if (GamePad.GetState(PlayerIndex.One).Buttons.RightShoulder == ButtonState.Pressed)
+            GamePadState pad = GamePad.GetState(PlayerIndex.One);
+
+            if (pad.Buttons.RightShoulder == ButtonState.Pressed)
             {
-#if XBOX
-                using (StorageContainer container = saveDevice.OpenContainer("SharpNES - Saves"))
-                {
-                    myEngine.SaveRamDirectory = container.Path;
-                    myEngine.StopCart(); // Writes SaveRam
-                }
-#else
-                myEngine.StopCart(); // Writes SaveRam
-#endif
-                this.Exit();
+                if (pad.Buttons.Back == ButtonState.Pressed)
+                    Quit();
+
+                if (pad.DPad.Left == ButtonState.Pressed || pad.DPad.Up == ButtonState.Pressed)
+                    LoadPreviousRom();
+                if (pad.DPad.Right == ButtonState.Pressed || pad.DPad.Down == ButtonState.Pressed)
+                    LoadNextRom();
             }
 
             if (running)
@@ -135,17 +224,22 @@ namespace XNASharpNES
                         storageDeviceRequested = true;
                         storageDeviceRequestResult = StorageDevice.BeginShowStorageDeviceGuide(PlayerIndex.One, null, null);
                     }
+
                     if ((storageDeviceRequested) && (storageDeviceRequestResult.IsCompleted))
                     {
                         saveDevice = StorageDevice.EndShowStorageDeviceGuide(storageDeviceRequestResult);
-                        LoadCart("Zelda.nes");
-                        //if (device.IsConnected)
-                        //{
-                        //    DoSaveGame(device);
-                        //}
+
+                        string filename;
+                        using (StorageContainer container = saveDevice.OpenContainer("SharpNES"))
+                        {
+                            filename = LoadRomName(container.Path);
+                        }
+
+                        LoadCart(filename);
                     }
                 }
 #else
+                LoadCart(LoadRomName(StorageContainer.TitleLocation));
 #endif
             }
 
