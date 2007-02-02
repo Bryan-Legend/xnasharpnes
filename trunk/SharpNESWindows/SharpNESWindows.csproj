@@ -51,19 +51,81 @@
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Program.cs">
+    <Compile Include="..\XNASharpNES\BitmapFont.cs">
+      <Link>BitmapFont.cs</Link>
+      <XNAUseContentPipeline>false</XNAUseContentPipeline>
+      <Name>BitmapFont</Name>
+    </Compile>
+    <Compile Include="..\XNASharpNES\Program.cs">
+      <Link>Program.cs</Link>
       <XNAUseContentPipeline>false</XNAUseContentPipeline>
       <Name>Program</Name>
     </Compile>
-    <Compile Include="SharpNES.cs">
+    <Compile Include="..\XNASharpNES\SharpNES.cs">
+      <Link>SharpNES.cs</Link>
       <XNAUseContentPipeline>false</XNAUseContentPipeline>
       <Name>SharpNES</Name>
     </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\XNASharpNES\menufont-0.png">
+      <Link>menufont-0.png</Link>
+      <XNAUseContentPipeline>true</XNAUseContentPipeline>
+      <Importer>TextureImporter</Importer>
+      <Processor>SpriteTextureProcessor</Processor>
+      <Name>menufont-0</Name>
+    </Content>
+    <Content Include="..\XNASharpNES\menufont.xml">
+      <Link>menufont.xml</Link>
+      <XNAUseContentPipeline>false</XNAUseContentPipeline>
+      <Name>menufont</Name>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\XNASharpNES\titlefont-0.png">
+      <Link>titlefont-0.png</Link>
+      <XNAUseContentPipeline>true</XNAUseContentPipeline>
+      <Importer>TextureImporter</Importer>
+      <Processor>SpriteTextureProcessor</Processor>
+      <Name>titlefont-0</Name>
+    </Content>
+    <Content Include="..\XNASharpNES\titlefont-1.png">
+      <Link>titlefont-1.png</Link>
+      <XNAUseContentPipeline>true</XNAUseContentPipeline>
+      <Importer>TextureImporter</Importer>
+      <Processor>SpriteTextureProcessor</Processor>
+      <Name>titlefont-1</Name>
+    </Content>
+    <Content Include="..\XNASharpNES\titlefont-2.png">
+      <Link>titlefont-2.png</Link>
+      <XNAUseContentPipeline>true</XNAUseContentPipeline>
+      <Importer>TextureImporter</Importer>
+      <Processor>SpriteTextureProcessor</Processor>
+      <Name>titlefont-2</Name>
+    </Content>
+    <Content Include="..\XNASharpNES\titlefont-3.png">
+      <Link>titlefont-3.png</Link>
+      <XNAUseContentPipeline>true</XNAUseContentPipeline>
+      <Importer>TextureImporter</Importer>
+      <Processor>SpriteTextureProcessor</Processor>
+      <Name>titlefont-3</Name>
+    </Content>
+    <Content Include="..\XNASharpNES\titlefont-4.png">
+      <Link>titlefont-4.png</Link>
+      <XNAUseContentPipeline>true</XNAUseContentPipeline>
+      <Importer>TextureImporter</Importer>
+      <Processor>SpriteTextureProcessor</Processor>
+      <Name>titlefont-4</Name>
+    </Content>
+    <Content Include="..\XNASharpNES\titlefont.xml">
+      <Link>titlefont.xml</Link>
+      <XNAUseContentPipeline>false</XNAUseContentPipeline>
+      <Name>titlefont</Name>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Game.ico">
       <XNAUseContentPipeline>false</XNAUseContentPipeline>
       <Name>Game</Name>
