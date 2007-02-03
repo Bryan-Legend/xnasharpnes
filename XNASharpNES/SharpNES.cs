@@ -14,15 +14,12 @@ namespace XNASharpNES
     public class SharpNES : Microsoft.Xna.Framework.Game
     {
         #region Menu Constants
-        private static readonly Color BackgroundColor = new Color(0xcc, 0xcc, 0xcc);
-        private static readonly Color TitleColor = new Color(0x66, 0x66, 0x66);
-        private static readonly Color MenuItemColor = Color.Black;
+        private static readonly Color BackgroundColor = Color.White;
+        private static readonly Color TitleColor = Color.White;
+        private static readonly Color MenuItemColor = Color.SlateGray;
         private static readonly Color SelectedItemColor = Color.Red;
 
-        private static readonly String Title = "XNA SharpNES";
-        private static readonly String LongMenuName = "BomberMan2";
-
-        private const int NumMenuItems = 10;
+        private const int NumMenuItems = 11;
 
         private Vector2 TitlePosition;
         private Vector2 MenuPosition;
@@ -35,8 +32,8 @@ namespace XNASharpNES
         private Texture2D targetTexture;
         private Rectangle screenRectangle;
         private SpriteBatch spriteBatch;
-        private BitmapFont titleFont;
         private BitmapFont menuFont;
+        private Texture2D titleTexture;
 
         private StorageDevice saveDevice;
         private GamePadHelper menuPad = new GamePadHelper();
@@ -84,32 +81,27 @@ namespace XNASharpNES
 
             if (loadAllContent)
             {
+                titleTexture = content.Load<Texture2D>("Logo");
                 LoadFonts();
             }
         }
 
         private void LoadFonts()
         {
-            titleFont = new BitmapFont(content, "titlefont.xml");
-            titleFont.Reset(graphics.GraphicsDevice);
-
             menuFont = new BitmapFont(content, "menufont.xml");
             menuFont.Reset(graphics.GraphicsDevice);
 
             int screenWidth = graphics.PreferredBackBufferWidth;
             int screenHeight = graphics.PreferredBackBufferHeight;
 
-            int titleWidth = titleFont.MeasureString(Title);
-            int titleHeight = titleFont.Baseline;
             TitlePosition = new Vector2(
-                (screenWidth - titleWidth) / 2, 
-                screenHeight / 10);
+                (screenWidth - titleTexture.Width) / 2, 
+                screenHeight / 30);
 
-            int menuWidth = menuFont.MeasureString(LongMenuName);
             MenuItemHeight = menuFont.Baseline * 4 / 3;
             MenuPosition = new Vector2(
-                (screenWidth - menuWidth) / 2, 
-                TitlePosition.Y + (titleHeight * 3 / 2));
+                screenWidth / 8,
+                TitlePosition.Y + titleTexture.Height + (MenuItemHeight / 2));
         }
 
         protected override void UnloadGraphicsContent(bool unloadAllContent)
@@ -212,7 +204,9 @@ namespace XNASharpNES
             graphics.GraphicsDevice.Clear(BackgroundColor);
             spriteBatch.Begin(SpriteBlendMode.None);
 
-            titleFont.DrawString(TitlePosition, TitleColor, Title);
+//            titleFont.DrawString(TitlePosition, TitleColor, Title);
+
+            spriteBatch.Draw(titleTexture, TitlePosition, Color.White);
 
             if (selectedRom < 0)
             {
@@ -233,11 +227,14 @@ namespace XNASharpNES
                 int currentMenuRom = topMenuRom + index;
                 Color itemColor = (currentMenuRom == selectedRom) ? SelectedItemColor : MenuItemColor;
 
-                menuFont.DrawString(
-                    (int)MenuPosition.X,
-                    (int)MenuPosition.Y + index * MenuItemHeight, 
-                    itemColor,
-                    Path.GetFileNameWithoutExtension(roms.Length <= currentMenuRom ? "..." : roms[currentMenuRom]));
+                if (roms.Length > currentMenuRom)
+                    menuFont.DrawString
+                    (
+                        (int)MenuPosition.X,
+                        (int)MenuPosition.Y + index * MenuItemHeight, 
+                        itemColor,
+                        Path.GetFileNameWithoutExtension(roms[currentMenuRom])
+                    );
             }
         }
 
