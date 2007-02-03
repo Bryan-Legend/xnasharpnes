@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
@@ -51,7 +52,18 @@ namespace XNASharpNES
             IsFixedTimeStep = false;
 
             saveDevice = StorageDevice.ShowStorageDeviceGuide();
-            roms = Directory.GetFiles(StorageContainer.TitleLocation, "*.nes");
+            ArrayList files = new ArrayList();
+            files.AddRange(Directory.GetFiles(StorageContainer.TitleLocation));
+            files.Sort();
+            int i = 0;
+            while (i < files.Count)
+            {
+                if (files[i].ToString().EndsWith(".nes"))
+                    i++;
+                else
+                    files.RemoveAt(i);
+            }
+            roms = (string[])files.ToArray(typeof(string));
             Array.Sort(roms);
             selectedRom = (roms.Length > 0) ? 0 : -1;
             topMenuRom = 0;
