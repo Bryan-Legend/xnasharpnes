@@ -54,7 +54,6 @@ namespace XNASharpNES
             saveDevice = StorageDevice.ShowStorageDeviceGuide();
             ArrayList files = new ArrayList();
             files.AddRange(Directory.GetFiles(StorageContainer.TitleLocation));
-            files.Sort();
             int i = 0;
             while (i < files.Count)
             {
