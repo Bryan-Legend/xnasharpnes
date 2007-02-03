@@ -19,7 +19,7 @@ namespace XNASharpNES
         private static readonly Color MenuItemColor = Color.SlateGray;
         private static readonly Color SelectedItemColor = Color.Red;
 
-        private const int NumMenuItems = 11;
+        private const int NumMenuItems = 24;
 
         private Vector2 TitlePosition;
         private Vector2 MenuPosition;
@@ -52,6 +52,7 @@ namespace XNASharpNES
 
             saveDevice = StorageDevice.ShowStorageDeviceGuide();
             roms = Directory.GetFiles(StorageContainer.TitleLocation, "*.nes");
+            Array.Sort(roms);
             selectedRom = (roms.Length > 0) ? 0 : -1;
             topMenuRom = 0;
         }
@@ -70,14 +71,17 @@ namespace XNASharpNES
             screenRectangle = new Rectangle(
                 0, 0,
                 graphics.PreferredBackBufferWidth,
-                graphics.PreferredBackBufferHeight); 
+                graphics.PreferredBackBufferHeight);
 
-            targetTexture = new Texture2D(
-                graphics.GraphicsDevice, 
-                256, 224, 1, 
-                ResourceUsage.None, 
-                SurfaceFormat.Bgr565, 
-                ResourceManagementMode.Manual);
+            targetTexture = 
+                new Texture2D
+                (
+                    graphics.GraphicsDevice,
+                    256, 224, 1,
+                    ResourceUsage.None,
+                    SurfaceFormat.Bgr565,
+                    ResourceManagementMode.Manual
+                );
 
             if (loadAllContent)
             {
@@ -95,13 +99,13 @@ namespace XNASharpNES
             int screenHeight = graphics.PreferredBackBufferHeight;
 
             TitlePosition = new Vector2(
-                (screenWidth - titleTexture.Width) / 2, 
+                (screenWidth - titleTexture.Width) / 2,
                 screenHeight / 30);
 
             MenuItemHeight = menuFont.Baseline * 4 / 3;
             MenuPosition = new Vector2(
                 screenWidth / 8,
-                TitlePosition.Y + titleTexture.Height + (MenuItemHeight / 2));
+                TitlePosition.Y + titleTexture.Height + MenuItemHeight);
         }
 
         protected override void UnloadGraphicsContent(bool unloadAllContent)
@@ -155,9 +159,9 @@ namespace XNASharpNES
         private void DrawGame()
         {
             targetTexture.SetData<short>(
-                myEngine.myPPU.offscreenBuffer, 
-                256 * 8, 
-                targetTexture.Width * targetTexture.Height, 
+                myEngine.myPPU.offscreenBuffer,
+                256 * 8,
+                targetTexture.Width * targetTexture.Height,
                 SetDataOptions.None);
 
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend);
@@ -204,8 +208,6 @@ namespace XNASharpNES
             graphics.GraphicsDevice.Clear(BackgroundColor);
             spriteBatch.Begin(SpriteBlendMode.None);
 
-//            titleFont.DrawString(TitlePosition, TitleColor, Title);
-
             spriteBatch.Draw(titleTexture, TitlePosition, Color.White);
 
             if (selectedRom < 0)
@@ -231,7 +233,7 @@ namespace XNASharpNES
                     menuFont.DrawString
                     (
                         (int)MenuPosition.X,
-                        (int)MenuPosition.Y + index * MenuItemHeight, 
+                        (int)MenuPosition.Y + index * MenuItemHeight,
                         itemColor,
                         Path.GetFileNameWithoutExtension(roms[currentMenuRom])
                     );
