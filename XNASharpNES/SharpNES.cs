@@ -237,7 +237,7 @@ namespace XNASharpNES
                     (int)MenuPosition.X,
                     (int)MenuPosition.Y + index * MenuItemHeight, 
                     itemColor,
-                    Path.GetFileNameWithoutExtension(roms[currentMenuRom]));
+                    Path.GetFileNameWithoutExtension(roms.Length <= currentMenuRom ? "..." : roms[currentMenuRom]));
             }
         }
 
