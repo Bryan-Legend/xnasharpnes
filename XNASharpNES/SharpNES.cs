@@ -37,20 +37,23 @@ namespace XNASharpNES
         private Texture2D titleTexture;
 
         private StorageDevice saveDevice;
-        private GamePadHelper menuPad = new GamePadHelper();
         private string[] roms;
         private int topMenuRom;
         private int selectedRom;
 
+        private GamePadHelper menuPad;
+        private bool waitForBackRelease = false;
+
         private NesEngine myEngine = new NesEngine();
         private bool running = false;
-        private bool waitForBackRelease = false;
 
         public SharpNES()
         {
             graphics = new GraphicsDeviceManager(this);
             content = new ContentManager(Services);
             IsFixedTimeStep = false;
+
+            menuPad = new GamePadHelper(20);
 
             saveDevice = StorageDevice.ShowStorageDeviceGuide();
             ArrayList files = new ArrayList();
@@ -65,7 +68,7 @@ namespace XNASharpNES
             }
             roms = (string[])files.ToArray(typeof(string));
             Array.Sort(roms);
-            selectedRom = (roms.Length > 0) ? 0 : -1;
+            selectedRom = 0;
             topMenuRom = 0;
         }
 
@@ -195,21 +198,19 @@ namespace XNASharpNES
                 {
                     return;
                 }
-                else
-                {
-                    menuPad.Reset();
-                    waitForBackRelease = false;
-                }
+
+                menuPad.Reset();
+                waitForBackRelease = false;
             }
 
-            if (menuPad.BackWasPressed)
+            if (menuPad.BackIsPressed)
             {
                 Quit();
             }
 
-            if (selectedRom >= 0)
+            if (roms.Length > 0)
             {
-                if (menuPad.StartWasPressed || menuPad.AWasPressed)
+                if (menuPad.StartIsPressed || menuPad.AIsPressed)
                 {
                     LoadCart(roms[selectedRom]);
                 }
@@ -241,7 +242,7 @@ namespace XNASharpNES
 
             spriteBatch.Draw(titleTexture, TitlePosition, Color.White);
 
-            if (selectedRom < 0)
+            if (roms.Length == 0)
             {
                 menuFont.DrawString(MenuPosition, SelectedItemColor, "No ROMs Available.");
             }

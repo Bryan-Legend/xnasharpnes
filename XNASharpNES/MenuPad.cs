@@ -11,6 +11,8 @@ namespace XNASharpNES
         #region Private Attributes
         private PlayerIndex player;
         private GamePadState currentState;
+        private bool useAutoRepeat;
+        private int autoRepeatCount;
         private bool startWasPressed = false;
         private bool backWasPressed = false;
         private bool aWasPressed = false;
@@ -21,13 +23,23 @@ namespace XNASharpNES
         private bool downWasPressed = false;
         private bool leftWasPressed = false;
         private bool rightWasPressed = false;
+        private int startRepeatCount = 0;
+        private int backRepeatCount = 0;
+        private int aRepeatCount = 0;
+        private int bRepeatCount = 0;
+        private int xRepeatCount = 0;
+        private int yRepeatCount = 0;
+        private int upRepeatCount = 0;
+        private int downRepeatCount = 0;
+        private int leftRepeatCount = 0;
+        private int rightRepeatCount = 0;
         #endregion
 
         public bool StartWasPressed
         {
             get
             {
-                return CheckPressed(currentState.Buttons.Start, ref startWasPressed);
+                return CheckPressed(currentState.Buttons.Start, ref startWasPressed, ref startRepeatCount);
             }
         }
 
@@ -35,15 +47,7 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.Buttons.Back, ref backWasPressed);
-            }
-        }
-
-        public bool UpWasPressed
-        {
-            get
-            {
-                return CheckPressed(currentState.DPad.Up, ref upWasPressed);
+                return CheckPressed(currentState.Buttons.Back, ref backWasPressed, ref backRepeatCount);
             }
         }
 
@@ -51,7 +55,7 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.Buttons.A, ref aWasPressed);
+                return CheckPressed(currentState.Buttons.A, ref aWasPressed, ref aRepeatCount);
             }
         }
 
@@ -59,7 +63,7 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.Buttons.B, ref bWasPressed);
+                return CheckPressed(currentState.Buttons.B, ref bWasPressed, ref bRepeatCount);
             }
         }
 
@@ -67,7 +71,7 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.Buttons.X, ref xWasPressed);
+                return CheckPressed(currentState.Buttons.X, ref xWasPressed, ref xRepeatCount);
             }
         }
 
@@ -75,7 +79,15 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.Buttons.Y, ref yWasPressed);
+                return CheckPressed(currentState.Buttons.Y, ref yWasPressed, ref yRepeatCount);
+            }
+        }
+
+        public bool UpWasPressed
+        {
+            get
+            {
+                return CheckPressed(currentState.DPad.Up, ref upWasPressed, ref upRepeatCount);
             }
         }
 
@@ -83,7 +95,7 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.DPad.Down, ref downWasPressed);
+                return CheckPressed(currentState.DPad.Down, ref downWasPressed, ref downRepeatCount);
             }
         }
 
@@ -91,7 +103,7 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.DPad.Left, ref leftWasPressed);
+                return CheckPressed(currentState.DPad.Left, ref leftWasPressed, ref leftRepeatCount);
             }
         }
 
@@ -99,7 +111,7 @@ namespace XNASharpNES
         {
             get
             {
-                return CheckPressed(currentState.DPad.Right, ref rightWasPressed);
+                return CheckPressed(currentState.DPad.Right, ref rightWasPressed, ref rightRepeatCount);
             }
         }
 
@@ -204,16 +216,33 @@ namespace XNASharpNES
         /// </summary>
         public GamePadHelper()
         {
-            this.player = PlayerIndex.One;
+            Init(PlayerIndex.One, 0);
+        }
+
+        /// <summary>
+        /// Constructs a GamePadHelper object for given Player.
+        /// </summary>
+        /// <param name="autoRepeatCount">Allows a button to "repeat" if held down for greater than this number of updates.</param>
+        public GamePadHelper(int autoRepeatCount)
+        {
+            Init(PlayerIndex.One, autoRepeatCount);
         }
 
         /// <summary>
         /// Constructs a GamePadHelper object for given Player.
         /// </summary>
         /// <param name="player">Player index</param>
-        public GamePadHelper(PlayerIndex player)
+        /// <param name="autoRepeatCount">Allows a button to "repeat" if held down for greater than this number of updates.</param>
+        public GamePadHelper(int autoRepeatCount, PlayerIndex player)
+        {
+            Init(player, autoRepeatCount);
+        }
+
+        private void Init(PlayerIndex player, int autoRepeatCount)
         {
             this.player = player;
+            this.autoRepeatCount = autoRepeatCount;
+            useAutoRepeat = (autoRepeatCount != 0);
         }
 
         /// <summary>
@@ -223,16 +252,16 @@ namespace XNASharpNES
         public void Update()
         {
             currentState = GamePad.GetState(PlayerIndex.One);
-            UpdateButtonState(currentState.Buttons.Start, ref startWasPressed);
-            UpdateButtonState(currentState.Buttons.Back, ref backWasPressed);
-            UpdateButtonState(currentState.Buttons.A, ref aWasPressed);
-            UpdateButtonState(currentState.Buttons.B, ref bWasPressed);
-            UpdateButtonState(currentState.Buttons.X, ref xWasPressed);
-            UpdateButtonState(currentState.Buttons.Y, ref yWasPressed);
-            UpdateButtonState(currentState.DPad.Up, ref upWasPressed);
-            UpdateButtonState(currentState.DPad.Down, ref downWasPressed);
-            UpdateButtonState(currentState.DPad.Left, ref leftWasPressed);
-            UpdateButtonState(currentState.DPad.Right, ref rightWasPressed);
+            UpdateButtonState(currentState.Buttons.Start, ref startWasPressed, ref startRepeatCount);
+            UpdateButtonState(currentState.Buttons.Back, ref backWasPressed, ref backRepeatCount);
+            UpdateButtonState(currentState.Buttons.A, ref aWasPressed, ref aRepeatCount);
+            UpdateButtonState(currentState.Buttons.B, ref bWasPressed, ref bRepeatCount);
+            UpdateButtonState(currentState.Buttons.X, ref xWasPressed, ref xRepeatCount);
+            UpdateButtonState(currentState.Buttons.Y, ref yWasPressed, ref yRepeatCount);
+            UpdateButtonState(currentState.DPad.Up, ref upWasPressed, ref upRepeatCount);
+            UpdateButtonState(currentState.DPad.Down, ref downWasPressed, ref downRepeatCount);
+            UpdateButtonState(currentState.DPad.Left, ref leftWasPressed, ref leftRepeatCount);
+            UpdateButtonState(currentState.DPad.Right, ref rightWasPressed, ref rightRepeatCount);
         }
 
         /// <summary>
@@ -253,21 +282,48 @@ namespace XNASharpNES
         }
 
         #region Private Methods
-        private void UpdateButtonState(ButtonState state, ref bool wasPressed)
+        private void UpdateButtonState(ButtonState state, ref bool wasPressed, ref int repeatCounter)
         {
             if (state == ButtonState.Pressed)
             {
-                wasPressed = true;
+                if (!wasPressed)
+                {
+                    wasPressed = true;
+                    repeatCounter = 0;
+                }
+                else
+                {
+                    if (useAutoRepeat)
+                    {
+                        repeatCounter = (repeatCounter + 1) % autoRepeatCount;
+                    }
+                }
             }
         }
 
-        private bool CheckPressed(ButtonState state, ref bool wasPressed)
+        private bool CheckPressed(ButtonState state, ref bool wasPressed, ref int repeatCounter)
         {
-            if (wasPressed && state == ButtonState.Released)
+            if (wasPressed)
             {
-                wasPressed = false;
-                return true;
+                if (state == ButtonState.Released)
+                {
+                    wasPressed = false;
+
+                    if (!useAutoRepeat)
+                    {
+                        // When not using autorepeat, return true whenever button
+                        // has been pressed and then released.
+                        return true;
+                    }
+                }
+                else if ((useAutoRepeat) && (repeatCounter == 0))
+                {
+                    // When using autorepeat, only return true when counter is 0.
+                    return true;
+                }
             }
+
+            // For all other conditions, return false.
             return false;
         }
         #endregion
