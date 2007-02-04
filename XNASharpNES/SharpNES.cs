@@ -68,7 +68,14 @@ namespace XNASharpNES
             }
             roms = (string[])files.ToArray(typeof(string));
             Array.Sort(roms);
-            selectedRom = 0;
+
+            string lastRom = LoadRomName();
+            selectedRom = Array.IndexOf(roms, lastRom);
+            if (selectedRom < 0)
+            {
+                selectedRom = 0;
+            }
+
             topMenuRom = 0;
         }
 
@@ -272,8 +279,38 @@ namespace XNASharpNES
             }
         }
 
+        private void SaveRomName(string rom)
+        {
+            using (StorageContainer container = saveDevice.OpenContainer("SharpNES"))
+            {
+                using (StreamWriter writer = File.CreateText(Path.Combine(container.Path, "LastRom.txt")))
+                {
+                    writer.Write(rom);
+                }
+            }
+        }
+
+        private string LoadRomName()
+        {
+            string result = String.Empty;
+
+            using (StorageContainer container = saveDevice.OpenContainer("SharpNES"))
+            {
+                string filename = Path.Combine(container.Path, "LastRom.txt");
+
+                if (File.Exists(filename))
+                {
+                    using (StreamReader reader = File.OpenText(filename))
+                        result = reader.ReadLine();
+                }
+            }
+
+            return result;
+        }
+
         private void LoadCart(string filename)
         {
+            SaveRomName(filename);
             myEngine.LoadCart(filename);
             myEngine.LoadRam();
             myEngine.StartCart();

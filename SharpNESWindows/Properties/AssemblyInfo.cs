@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("SharpNESWindows")]
 [assembly: AssemblyProduct("SharpNESWindows")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("NES Emulator for Windows. code.google.com/p/xnasharpnes/")]
 [assembly: AssemblyCompany("")]
 
 [assembly: AssemblyCopyright("Copyright ©  2007")]
