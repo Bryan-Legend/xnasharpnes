@@ -69,7 +69,10 @@
       <XNAUseContentPipeline>false</XNAUseContentPipeline>
       <Name>SharpNES</Name>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <XNAUseContentPipeline>false</XNAUseContentPipeline>
+      <Name>AssemblyInfo</Name>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\XNASharpNES\Logo.png">
