@@ -235,6 +235,23 @@ namespace XNASharpNES
             UpdateButtonState(currentState.DPad.Right, ref rightWasPressed);
         }
 
+        /// <summary>
+        /// Reset all state variables.
+        /// </summary>
+        public void Reset()
+        {
+            startWasPressed = false;
+            backWasPressed = false;
+            aWasPressed = false;
+            bWasPressed = false;
+            xWasPressed = false;
+            yWasPressed = false;
+            upWasPressed = false;
+            downWasPressed = false;
+            leftWasPressed = false;
+            rightWasPressed = false;
+        }
+
         #region Private Methods
         private void UpdateButtonState(ButtonState state, ref bool wasPressed)
         {

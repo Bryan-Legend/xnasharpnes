@@ -44,6 +44,7 @@ namespace XNASharpNES
 
         private NesEngine myEngine = new NesEngine();
         private bool running = false;
+        private bool waitForBackRelease = false;
 
         public SharpNES()
         {
@@ -129,8 +130,6 @@ namespace XNASharpNES
 
         protected override void Update(GameTime gameTime)
         {
-            menuPad.Update();
-
             if (running)
             {
                 UpdateGame();
@@ -159,9 +158,13 @@ namespace XNASharpNES
 
         private void UpdateGame()
         {
-            if (menuPad.RightShoulderIsPressed && menuPad.BackWasPressed)
+            GamePadState pad = GamePad.GetState(PlayerIndex.One);
+
+            if ((pad.Buttons.Back == ButtonState.Pressed) && 
+                (pad.Buttons.RightShoulder == ButtonState.Pressed))
             {
                 StopCart();
+                waitForBackRelease = true;
                 return;
             }
             myEngine.RunCart();
@@ -182,6 +185,23 @@ namespace XNASharpNES
 
         private void UpdateMenu()
         {
+            menuPad.Update();
+
+            if (waitForBackRelease)
+            {
+                // Since the back button is used to leave the game,
+                // we need to wait here for it to be released.
+                if (menuPad.BackIsPressed)
+                {
+                    return;
+                }
+                else
+                {
+                    menuPad.Reset();
+                    waitForBackRelease = false;
+                }
+            }
+
             if (menuPad.BackWasPressed)
             {
                 Quit();
