@@ -71,7 +71,7 @@ A Note About Sound:
 
 
 Change Log:
-	Release 3 ()
+	Release 3 (3-8-2007)
 		Rom Loading Menu - Contributed by Thomas Aylesworth		
 			Font classes from XNA Extras by Gary Kacmarcik at
 			http://blogs.msdn.com/garykac/articles/749188.aspx
