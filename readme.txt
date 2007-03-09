@@ -32,6 +32,11 @@ speed when not running with a debugger on the 360.
 This requires a creators club account which runs $99 a year or $49 for four
 months.  You'll also need the free Visual C# Studio Express and the XNA bits.
 
+To run on windows you'll need the Microsoft XNA Framework Redistributable 1.0:
+http://www.microsoft.com/downloads/details.aspx?familyid=2E136A1F-F187-478C-9DA5-AAEB0904782B&displaylang=en
+and may also need the DirectX End-User Runtime Web Installer:
+http://www.microsoft.com/downloads/details.aspx?familyid=2DA43D38-DB71-4C1B-BC6A-9B6652CD92A3&displaylang=en
+
 
 Controls:
 	A = A
